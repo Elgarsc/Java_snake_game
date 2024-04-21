@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake Game</title>
+  <link href="https://unpkg.com/tailwindcss@^2.2/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f7fafc;
+    }
+    canvas {
+      border: 1px solid #cbd5e0;
+    }
+    button{
+        align-items: center
+
+    }
+  </style>
+</head>
+
+<body class="font-sans">
+
+  <canvas id="gameCanvas" width="800" height="800">Snake Game</canvas>
+
+  <div id="gameoverscreen" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-black bg-opacity-50 px-800 flex justify-center items-center">
+    <div class="text-white font-bold text-3xl">
+        </div>
+        <button id="mystartbutton" class="bg-blue-500 text-white font-sans p-5 text-lg rounded">Start</button>
+   </div>
+  <script> 
+
+const gameoverscreen = document.getElementById('gameoverscreen');
+
+function showgame() {
+    gameoverscreen.classList.add('hidden');
+}
+function showgameover() {
+    gameoverscreen.classList.remove('hidden');
+}
+
+function handleClick(){
+    showgame();
+    
+
+    let score = 0;
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const box = 40;
+    const gridSize = canvas.width / box;
+    
+    let snake = [];
+    snake[0] = {
+        x: Math.floor(Math.random() * gridSize) * box,
+        y: Math.floor(Math.random() * gridSize) * box
+    };
+
+    let food = {
+        x: Math.floor(Math.random() * gridSize) * box,
+        y: Math.floor(Math.random() * gridSize) * box
+    };
+
+
+    document.addEventListener('keydown', changeDirection);
+
+    let direction;
+    function changeDirection(event){
+    const key = event.key.toLowerCase();
+
+    if(key === 'w' && direction !== 'down'){
+        direction = "up";
+    }
+    else if(key === 'a' && direction !== 'right'){
+        direction = "left";
+    }
+    else if(key === 'd' && direction !== 'left'){
+        direction = "right";
+    }
+    else if(key === 's' && direction !== 'up'){
+        direction = "down";
+    }
+    };
+
+    
+
+    function collision(head, array) {
+        for (let i = 0; i < array.length; i++) {
+            if (head.x === array[i].x && head.y === array[i].y) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw snake
+        for (let i = 0; i < snake.length; i++) {
+            ctx.fillStyle = (i === 0) ? 'green' : 'green';
+            ctx.fillRect(snake[i].x, snake[i].y, box, box);
+
+            ctx.strokeStyle = 'black';
+            ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+            
+        }
+
+        
+        ctx.beginPath();
+        ctx.arc(food.x+20, food.y+20, 20, 0, 2 * Math.PI);
+        ctx.fillStyle = 'red'; 
+        ctx.fill();
+        ctx.closePath();
+
+        
+        let snakeX = snake[0].x;
+        let snakeY = snake[0].y;
+
+        
+        if (direction === 'left') snakeX -= box;
+        if (direction === 'up') snakeY -= box;
+        if (direction === 'right') snakeX += box;
+        if (direction === 'down') snakeY += box;
+
+        
+        if (snakeX === food.x && snakeY === food.y) {
+            score++;
+            food = {
+                x: Math.floor(Math.random() * gridSize) * box,
+                y: Math.floor(Math.random() * gridSize) * box
+            };
+        } else {
+            snake.pop();
+        }
+
+        
+        const newHead = {
+            x: snakeX,
+            y: snakeY
+        };
+
+        // Check for collision
+        if (snakeX < 0 || snakeY < 0 || snakeX >= canvas.width || snakeY >= canvas.height || collision(newHead, snake)) {
+            clearInterval(game);
+            showgameover();
+        }
+        snake.unshift(newHead);   
+    }
+    let game = setInterval(draw, 100); 
+    }
+
+    const startbutton = document.getElementById('mystartbutton');
+    startbutton.addEventListener('click', handleClick);
+    
+  </script>
+</body>
+</html>
